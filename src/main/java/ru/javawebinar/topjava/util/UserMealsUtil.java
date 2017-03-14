@@ -3,11 +3,15 @@ package ru.javawebinar.topjava.util;
 import ru.javawebinar.topjava.model.UserMeal;
 import ru.javawebinar.topjava.model.UserMealWithExceed;
 
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.util.*;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * GKislin
@@ -30,21 +34,12 @@ public class UserMealsUtil {
     }
 
     public static List<UserMealWithExceed>  getFilteredWithExceeded(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        List<UserMealWithExceed> mealWithExceedList = new ArrayList<>();
-        Map<LocalDate, Integer> dailyCalories = new HashMap<>();
-        for (UserMeal userMeal : mealList) {
-            LocalDate currentDay = userMeal.getDateTime().toLocalDate();
-            if (dailyCalories.containsKey(currentDay)) {
-                dailyCalories.replace(currentDay, dailyCalories.get(currentDay) + userMeal.getCalories());
-            } else {
-                dailyCalories.put(currentDay, userMeal.getCalories());
-            }
-        }
-        for (UserMeal userMeal : mealList) {
-            if (TimeUtil.isBetween(userMeal.getDateTime().toLocalTime(), startTime, endTime)) {
-                mealWithExceedList.add(new UserMealWithExceed(userMeal, dailyCalories.get(userMeal.getDateTime().toLocalDate())>caloriesPerDay));
-            }
-        }
+        Map<LocalDate, Integer> dailyCalories = mealList.stream()
+                .collect(Collectors.groupingBy((UserMeal p) -> p.getDateTime().toLocalDate(), Collectors.summingInt(UserMeal::getCalories)));
+        List<UserMealWithExceed> mealWithExceedList = mealList.stream()
+                .filter(e -> TimeUtil.isBetween(e.getDateTime().toLocalTime(), startTime, endTime))
+                .map(e -> new UserMealWithExceed(e, dailyCalories.get(e.getDateTime().toLocalDate())>caloriesPerDay))
+                .collect(Collectors.toList());
         return mealWithExceedList;
     }
 }
