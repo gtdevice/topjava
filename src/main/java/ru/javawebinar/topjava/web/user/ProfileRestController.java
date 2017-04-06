@@ -1,9 +1,16 @@
 package ru.javawebinar.topjava.web.user;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.javawebinar.topjava.AuthorizedUser;
 import ru.javawebinar.topjava.model.User;
+import ru.javawebinar.topjava.service.UserService;
 
 public class ProfileRestController extends AbstractUserController {
+
+    @Autowired
+    public ProfileRestController(UserService service) {
+        super(service);
+    }
 
     public User get() {
         return super.get(AuthorizedUser.id());
