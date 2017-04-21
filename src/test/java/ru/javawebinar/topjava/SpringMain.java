@@ -1,3 +1,4 @@
+
 package ru.javawebinar.topjava;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
@@ -18,7 +19,8 @@ import java.time.LocalTime;
 import java.time.Month;
 public class SpringMain {
     public static void main(String[] args) {
-        ConfigurableApplicationContext appCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml");
+        // java 7 Automatic resource management
+        try (ConfigurableApplicationContext appCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml","spring/mock.xml")) {
         System.out.println("Bean definition names: " + Arrays.toString(appCtx.getBeanDefinitionNames()));
         AdminRestController adminUserController = appCtx.getBean(AdminRestController.class);
         adminUserController.create(new User(null, "userName", "email", "password", Role.ROLE_ADMIN));
@@ -35,4 +37,4 @@ public class SpringMain {
         userRepository.getAll();
         appCtx.close();
     }
-}
+}}
